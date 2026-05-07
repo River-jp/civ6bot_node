@@ -1,3 +1,5 @@
+prompt.txt
+.cursor/
 node_modules/
 .next/
 dist/
