@@ -15,6 +15,6 @@
     "client": "npm run dev -w @civ6bot/client"
   },
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   }
 }
