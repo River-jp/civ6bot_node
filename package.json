@@ -1,0 +1,20 @@
+{
+  "name": "civ6bot-nodejs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @civ6bot/web",
+    "build": "npm run build -w @civ6bot/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "client": "npm run dev -w @civ6bot/client"
+  },
+  "engines": {
+    "node": ">=20.11.0"
+  }
+}

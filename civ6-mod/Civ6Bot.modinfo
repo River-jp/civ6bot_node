@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="f2a6f898-26fc-48ac-81c2-c2db5c16d7a6" version="1">
+  <Properties>
+    <Name>Civ6 Bot Exporter</Name>
+    <Description>Exports local Civilization VI state to Lua.log for the Civ6 Discord Bot companion.</Description>
+    <Teaser>Civ6 Bot Exporter</Teaser>
+    <Authors>Civ6 Bot</Authors>
+  </Properties>
+  <InGameActions>
+    <AddGameplayScripts id="Civ6BotExporter">
+      <File>Scripts/Civ6Bot.lua</File>
+    </AddGameplayScripts>
+  </InGameActions>
+  <Files>
+    <File>Scripts/Civ6Bot.lua</File>
+  </Files>
+</Mod>
