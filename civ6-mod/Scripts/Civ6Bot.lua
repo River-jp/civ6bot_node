@@ -1,121 +1,79 @@
--- Civ6 Bot Exporter
--- Prints one tagged JSON line to Lua.log. The Node companion watches this tag.
+-- Civ6 Bot Exporter gameplay entry point.
 
-local EXPORT_PREFIX = "CIV6BOT_EXPORT:"
-local HOTKEY = Keys.VK_F8
+local function LoadExporter()
+  local names = {
+    "Civ6BotExport",
+    "Scripts/Civ6BotExport",
+    "Civ6BotExport.lua",
+    "Scripts/Civ6BotExport.lua"
+  }
 
-local function JsonEscape(value)
-  value = tostring(value or "")
-  value = string.gsub(value, "\\", "\\\\")
-  value = string.gsub(value, "\"", "\\\"")
-  value = string.gsub(value, "\n", "\\n")
-  value = string.gsub(value, "\r", "\\r")
-  return value
-end
-
-local function JsonString(value)
-  return "\"" .. JsonEscape(value) .. "\""
-end
-
-local function JsonArray(values)
-  local parts = {}
-  for _, value in ipairs(values) do
-    table.insert(parts, JsonString(value))
-  end
-  return "[" .. table.concat(parts, ",") .. "]"
-end
-
-local function CurrentPlayer()
-  local playerId = Game.GetLocalPlayer()
-  if playerId == -1 then
-    return nil
-  end
-  return Players[playerId]
-end
-
-local function PlayerSummary(player)
-  local config = PlayerConfigurations[player:GetID()]
-  local treasury = player:GetTreasury()
-  local religion = player:GetReligion()
-  local techs = player:GetTechs()
-  local culture = player:GetCulture()
-
-  return table.concat({
-    "\"civilization\":" .. JsonString(config and config:GetCivilizationTypeName() or ""),
-    "\"leader\":" .. JsonString(config and config:GetLeaderTypeName() or ""),
-    "\"score\":" .. tostring(player:GetScore() or 0),
-    "\"gold\":" .. tostring(treasury and treasury:GetGoldBalance() or 0),
-    "\"faith\":" .. tostring(religion and religion:GetFaithBalance() or 0),
-    "\"sciencePerTurn\":" .. tostring(techs and techs:GetScienceYield() or 0),
-    "\"culturePerTurn\":" .. tostring(culture and culture:GetCultureYield() or 0)
-  }, ",")
-end
-
-local function CitiesJson(player)
-  local parts = {}
-  local cities = player:GetCities()
-  for _, city in cities:Members() do
-    local buildQueue = city:GetBuildQueue()
-    local currentProduction = buildQueue and buildQueue:GetCurrentProductionTypeHash()
-    table.insert(parts, "{" .. table.concat({
-      "\"name\":" .. JsonString(city:GetName()),
-      "\"population\":" .. tostring(city:GetPopulation() or 0),
-      "\"production\":" .. JsonString(currentProduction or ""),
-      "\"turnsRemaining\":" .. tostring(buildQueue and buildQueue:GetTurnsLeft() or 0)
-    }, ",") .. "}")
-  end
-  return "[" .. table.concat(parts, ",") .. "]"
-end
-
-local function UnitsJson(player)
-  local parts = {}
-  local units = player:GetUnits()
-  for _, unit in units:Members() do
-    table.insert(parts, "{" .. table.concat({
-      "\"type\":" .. JsonString(GameInfo.Units[unit:GetType()] and GameInfo.Units[unit:GetType()].UnitType or ""),
-      "\"x\":" .. tostring(unit:GetX() or 0),
-      "\"y\":" .. tostring(unit:GetY() or 0),
-      "\"health\":" .. tostring(unit:GetDamage() and (100 - unit:GetDamage()) or 100),
-      "\"moves\":" .. tostring(unit:GetMovesRemaining() or 0)
-    }, ",") .. "}")
-  end
-  return "[" .. table.concat(parts, ",") .. "]"
-end
-
-local function Export()
-  local player = CurrentPlayer()
-  if player == nil then
-    print("Civ6Bot: no local player")
-    return
+  for _, name in ipairs(names) do
+    local ok, result = pcall(include, name)
+    local exporter = result or Civ6BotExport
+    if ok and exporter ~= nil and type(exporter.SafeExport) == "function" then
+      print("Civ6Bot: export module loaded via " .. name)
+      return exporter
+    end
   end
 
-  local gameEra = Game.GetEras() and Game.GetEras():GetCurrentEra() or -1
-  local year = Game.GetGameTurnYear and Game.GetGameTurnYear() or ""
-  local json = "{" .. table.concat({
-    "\"exportVersion\":1",
-    "\"turn\":" .. tostring(Game.GetCurrentGameTurn()),
-    "\"year\":" .. JsonString(year),
-    "\"era\":" .. JsonString(gameEra),
-    "\"player\":{" .. PlayerSummary(player) .. "}",
-    "\"cities\":" .. CitiesJson(player),
-    "\"units\":" .. UnitsJson(player),
-    "\"technologies\":[]",
-    "\"civics\":[]",
-    "\"resources\":{}",
-    "\"diplomacy\":[]"
-  }, ",") .. "}"
+  return Civ6BotExport
+end
 
-  print(EXPORT_PREFIX .. json)
+local Exporter = LoadExporter()
+local HOTKEY = (Keys and Keys.VK_F8) or 119
+
+local function SafeExport(reason)
+  if Exporter == nil or type(Exporter.SafeExport) ~= "function" then
+    Exporter = LoadExporter()
+  end
+
+  if Exporter ~= nil and type(Exporter.SafeExport) == "function" then
+    Exporter.SafeExport(reason)
+  else
+    print("Civ6Bot: export module is unavailable")
+  end
 end
 
 local function OnInputActionTriggered(actionId)
-  if actionId == HOTKEY then
-    Export()
+  local action = tostring(actionId)
+  if actionId == HOTKEY or action == tostring(HOTKEY) or action == "F8" or action == "VK_F8" then
+    print("Civ6Bot: F8 export triggered")
+    SafeExport("gameplay hotkey")
+  end
+end
+
+local function OnLocalPlayerTurnBegin(playerId)
+  if Game == nil or type(Game.GetLocalPlayer) ~= "function" then
+    return
+  end
+
+  local ok, localPlayerId = pcall(Game.GetLocalPlayer)
+  if ok and playerId == localPlayerId then
+    SafeExport("local turn begin")
   end
 end
 
 if Events.InputActionTriggered ~= nil then
   Events.InputActionTriggered.Add(OnInputActionTriggered)
+else
+  print("Civ6Bot: Events.InputActionTriggered is unavailable; F8 hotkey export disabled")
+end
+
+if LuaEvents ~= nil and LuaEvents.Civ6BotExportRequest ~= nil and type(LuaEvents.Civ6BotExportRequest.Add) == "function" then
+  LuaEvents.Civ6BotExportRequest.Add(function(reason)
+    SafeExport(reason or "lua event")
+  end)
+  print("Civ6Bot: LuaEvents export request handler registered")
+end
+
+if Events.LocalPlayerTurnBegin ~= nil then
+  Events.LocalPlayerTurnBegin.Add(OnLocalPlayerTurnBegin)
+elseif Events.TurnBegin ~= nil then
+  Events.TurnBegin.Add(function()
+    SafeExport("turn begin")
+  end)
 end
 
 print("Civ6Bot Exporter loaded. Press F8 to export local state.")
+SafeExport("initial load")

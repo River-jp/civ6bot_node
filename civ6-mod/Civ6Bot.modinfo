@@ -5,13 +5,33 @@
     <Description>Exports local Civilization VI state to Lua.log for the Civ6 Discord Bot companion.</Description>
     <Teaser>Civ6 Bot Exporter</Teaser>
     <Authors>Civ6 Bot</Authors>
+    <CompatibleVersions>1.2,2.0</CompatibleVersions>
   </Properties>
   <InGameActions>
     <AddGameplayScripts id="Civ6BotExporter">
       <File>Scripts/Civ6Bot.lua</File>
     </AddGameplayScripts>
+    <AddUserInterfaces id="Civ6BotExporterUI">
+      <Properties>
+        <Context>InGame</Context>
+      </Properties>
+      <File>Scripts/Civ6BotHotkey.xml</File>
+    </AddUserInterfaces>
+    <ReplaceUIScript id="Civ6BotWorldInput">
+      <Properties>
+        <LuaContext>WorldInput</LuaContext>
+        <LuaReplace>Scripts/Civ6BotWorldInput.lua</LuaReplace>
+      </Properties>
+    </ReplaceUIScript>
+    <ImportFiles id="Civ6BotImports">
+      <File>Scripts/Civ6BotExport.lua</File>
+    </ImportFiles>
   </InGameActions>
   <Files>
     <File>Scripts/Civ6Bot.lua</File>
+    <File>Scripts/Civ6BotExport.lua</File>
+    <File>Scripts/Civ6BotHotkey.xml</File>
+    <File>Scripts/Civ6BotHotkey.lua</File>
+    <File>Scripts/Civ6BotWorldInput.lua</File>
   </Files>
 </Mod>
