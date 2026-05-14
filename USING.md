@@ -14,7 +14,7 @@ Node.js は https://nodejs.org/ から LTS または Current をインストー�
 
 ## クライアントのインストール
 
-Web サイトの「使い方」ページから `install-civ6bot-client.bat` をダウンロードして実行します。
+Web サイトの「使い方」ページ `/using` から `install-civ6bot-client.bat` をダウンロードして実行します。
 
 このインストーラーは次を行います。
 
@@ -44,7 +44,17 @@ Git は不要です。インストーラーは `git clone` ではなく、Window
 3. メニューから操作を選びます。
 4. 初回は `1. Link and start watch` を選び、リンクコードを入力します。
 5. リンク済みの場合は `2. Start watch` で監視だけ開始できます。
-6. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
+6. リンク解除は `3. Unlink` を選びます。
+7. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
+
+メニュー:
+
+```text
+1. Link and start watch
+2. Start watch
+3. Unlink
+4. Exit
+```
 
 監視対象のログは通常ここです。
 
