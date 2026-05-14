@@ -70,14 +70,34 @@ if not exist "%LUA_LOG%" (
   echo.
 )
 
+:menu
+echo Select an action:
+echo   1. Link and start watch
+echo   2. Start watch
+echo   3. Unlink
+echo   4. Exit
+echo.
+set "ACTION="
+set /p ACTION=Enter number: 
+echo.
+
+if "%ACTION%"=="1" goto link
+if "%ACTION%"=="2" goto watch
+if "%ACTION%"=="3" goto unlink
+if "%ACTION%"=="4" goto end
+
+echo Invalid selection.
+echo.
+goto menu
+
+:link
 set "LINK_CODE="
 set /p LINK_CODE=Enter link code: 
 
 if "%LINK_CODE%"=="" (
   echo Link code is required.
   echo.
-  set "EXIT_CODE=1"
-  goto end
+  goto menu
 )
 
 echo.
@@ -86,10 +106,10 @@ call npm run client -- claim --code "%LINK_CODE%" --server "%SERVER_URL%" --log 
 if errorlevel 1 (
   echo.
   echo Link failed. Check the code and try again.
-  set "EXIT_CODE=1"
-  goto end
+  goto menu
 )
 
+:watch
 echo.
 echo Starting watch mode.
 echo Log: %LUA_LOG%
@@ -100,6 +120,21 @@ call npm run client -- watch --server "%SERVER_URL%" --log "%LUA_LOG%"
 echo.
 echo Watch stopped.
 set "EXIT_CODE=%ERRORLEVEL%"
+goto end
+
+:unlink
+echo Unlinking client...
+call npm run client -- unlink --server "%SERVER_URL%"
+if errorlevel 1 (
+  echo.
+  echo Unlink failed. The local config may already be missing or the token may already be invalid.
+  echo.
+  goto menu
+)
+
+echo.
+echo Unlinked.
+goto menu
 
 :end
 echo.

@@ -25,6 +25,7 @@ async function main() {
   if (command === "claim") return claim(args);
   if (command === "watch") return watch(args);
   if (command === "send-once") return sendOnce(args);
+  if (command === "unlink") return unlink(args);
   help();
 }
 
@@ -36,7 +37,7 @@ async function claim(args: Record<string, string>) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ code })
   });
-  const json = await response.json() as { ok: boolean; token?: string; matchId?: string; playerId?: string; reason?: string };
+  const json = await readJson(response) as { ok: boolean; token?: string; matchId?: string; playerId?: string; reason?: string };
   if (!response.ok || !json.ok || !json.token || !json.matchId || !json.playerId) {
     throw new Error(`claim failed: ${json.reason ?? response.statusText}`);
   }
@@ -81,6 +82,37 @@ async function sendOnce(args: Record<string, string>) {
   saveConfig({ ...config, lastOffset: result.offset });
 }
 
+async function unlink(args: Record<string, string>) {
+  const config = withOverrides(loadConfig(), args);
+  requireLinked(config);
+  const response = await fetch(`${config.serverUrl}/api/client/unlink`, {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${config.token}`
+    }
+  });
+  const json = await readJson(response) as { ok: boolean; reason?: string };
+  if (response.status === 401 && json.reason === "invalid_token") {
+    clearLink(config);
+    console.log(`Token was already invalid. Local config updated at ${configPath}`);
+    return;
+  }
+  if (!response.ok || !json.ok) {
+    throw new Error(`unlink failed: ${json.reason ?? response.statusText}`);
+  }
+  clearLink(config);
+  console.log(`Unlinked. Local config updated at ${configPath}`);
+}
+
+function clearLink(config: Config) {
+  saveConfig({
+    serverUrl: config.serverUrl,
+    logPath: config.logPath,
+    lastOffset: config.lastOffset,
+    lastHash: config.lastHash
+  });
+}
+
 async function readNewExports(logPath: string, offset: number) {
   if (!existsSync(logPath)) throw new Error(`Lua.log not found: ${logPath}`);
   const currentSize = statSync(logPath).size;
@@ -114,6 +146,16 @@ async function sendPayload(config: Config, payload: string) {
   }
   console.log(`Uploaded turn ${snapshot.turn}`);
   return true;
+}
+
+async function readJson(response: Response) {
+  const text = await response.text();
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    const body = text ? `: ${text.slice(0, 120)}` : "";
+    throw new Error(`server returned non-JSON response ${response.status}${body}`);
+  }
 }
 
 function parseArgs(args: string[]) {
@@ -172,7 +214,8 @@ function help() {
     "Commands:",
     "  claim --code CODE --server https://your-app.vercel.app [--log PATH]",
     "  watch [--server URL] [--log PATH] [--interval 2000]",
-    "  send-once [--server URL] [--log PATH]"
+    "  send-once [--server URL] [--log PATH]",
+    "  unlink [--server URL]"
   ].join("\n"));
 }
 

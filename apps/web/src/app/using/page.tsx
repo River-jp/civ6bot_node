@@ -63,6 +63,7 @@ export default function UsingPage() {
         <ol className="steps">
           <li><code>install-civ6bot-client.bat</code> を実行します。</li>
           <li>Node.js と npm の確認が表示されます。</li>
+          <li>初回は <code>1. Link and start watch</code> を選びます。</li>
           <li>Discord の <code>/link</code> で表示されたコードを入力します。</li>
           <li>リンクに成功すると watch モードが起動します。</li>
           <li>Civ6 のログが更新されると、試合状況ページに反映されます。</li>
@@ -105,10 +106,10 @@ export default function UsingPage() {
         <div className="panel">
           <h2>リンク解除</h2>
           <p>
-            PC 側のリンクを解除するには、ユーザーフォルダにある <code>.civ6bot-client.json</code> を削除します。
+            PC 側のバッチファイルを起動し、メニューから <code>3. Unlink</code> を選びます。
           </p>
           <p className="empty">
-            場所: <code>%USERPROFILE%\.civ6bot-client.json</code>
+            サーバー側のトークンを無効化し、PC 側の保存済みリンク情報も削除します。
           </p>
         </div>
       </section>

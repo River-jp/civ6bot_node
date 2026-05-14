@@ -41,9 +41,10 @@ Git は不要です。インストーラーは `git clone` ではなく、Window
 
 1. `install-civ6bot-client.bat` または `start-civ6bot-client.bat` を実行します。
 2. Node.js と npm の確認が表示されます。
-3. リンクコードを入力します。
-4. リンクに成功すると watch モードが起動します。
-5. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
+3. メニューから操作を選びます。
+4. 初回は `1. Link and start watch` を選び、リンクコードを入力します。
+5. リンク済みの場合は `2. Start watch` で監視だけ開始できます。
+6. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
 
 監視対象のログは通常ここです。
 
@@ -99,16 +100,14 @@ Civilization VI を一度起動してください。ログ出力が無効な場�
 
 ## リンク解除
 
-ローカル PC 側のリンク情報を削除する場合は、次のファイルを削除します。
+`start-civ6bot-client.bat` を起動し、メニューから `3. Unlink` を選びます。
+
+リンク解除はサーバー側のトークンを無効化し、PC 側の保存済みリンク情報も削除します。
+
+手動で PC 側の設定だけ確認したい場合、設定ファイルは次の場所にあります。
 
 ```text
 %USERPROFILE%\.civ6bot-client.json
 ```
 
-PowerShell では次のコマンドで削除できます。
-
-```powershell
-Remove-Item "$env:USERPROFILE\.civ6bot-client.json"
-```
-
-削除後は、再度 `/link` でコードを発行してリンクし直してください。
+再リンクする場合は、Discord で `/link` を実行して新しいコードを発行してください。

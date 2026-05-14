@@ -186,6 +186,22 @@ export async function authenticateClient(token: string) {
   return result.rows[0];
 }
 
+export async function unlinkClient(token: string) {
+  await ensureDb();
+  const hash = await sha256(token);
+  const existing = await db().execute({
+    sql: "SELECT id FROM match_players WHERE client_token_hash = ?",
+    args: [hash]
+  });
+  const row = existing.rows[0];
+  if (!row) return { ok: false as const, reason: "invalid_token" };
+  await db().execute({
+    sql: "UPDATE match_players SET client_token_hash = NULL, linked_at = NULL WHERE id = ?",
+    args: [String(row.id)]
+  });
+  return { ok: true as const };
+}
+
 export async function saveSnapshot(input: {
   matchId: string;
   playerId: string;
