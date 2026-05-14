@@ -1,4 +1,26 @@
-import { env } from "../src/lib/env";
+import { dirname, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+loadDotEnv(resolve(scriptDir, "../../..", ".env"));
+loadDotEnv(resolve(scriptDir, "..", ".env"));
+
+const { env } = await import("../src/lib/env");
+
+function loadDotEnv(path: string) {
+  if (!existsSync(path)) return;
+  for (const line of readFileSync(path, "utf8").split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const separator = trimmed.indexOf("=");
+    if (separator < 0) continue;
+    const key = trimmed.slice(0, separator).trim();
+    const rawValue = trimmed.slice(separator + 1).trim();
+    if (!key || process.env[key] !== undefined) continue;
+    process.env[key] = rawValue.replace(/^['"]|['"]$/g, "");
+  }
+}
 
 const commands = [
   {
