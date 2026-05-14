@@ -22,6 +22,8 @@ Web サイトの「使い方」ページ `/using` から `install-civ6bot-client
 - `%LOCALAPPDATA%\Civ6BotClient` に展開
 - `start-civ6bot-client.bat` を起動
 
+インストーラー画面は、正常終了でもエラーでも最後に Enter を押すまで閉じません。エラーが出た場合は、表示内容を確認してください。
+
 Git は不要です。インストーラーは `git clone` ではなく、Windows 標準の PowerShell で ZIP をダウンロードして展開します。
 
 すでにインストール済みの場合も、同じインストーラーを再実行すると最新版に更新できます。

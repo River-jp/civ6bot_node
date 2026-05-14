@@ -121,6 +121,8 @@ npm run register:commands -w @civ6bot/web
 - `%LOCALAPPDATA%\Civ6BotClient` に展開
 - `start-civ6bot-client.bat` を起動
 
+正常終了でもエラーでも、最後に Enter を押すまでインストーラー画面は閉じません。
+
 Git は不要です。Node.js と npm は必要です。
 
 ### 2-3. バッチメニュー

@@ -84,7 +84,7 @@ DATABASE_AUTH_TOKEN=
 
 ## PC 側クライアント
 
-利用者は `/using` から `install-civ6bot-client.bat` をダウンロードして実行します。Git は不要です。インストーラーは GitHub の ZIP を PowerShell でダウンロードして展開します。
+利用者は `/using` から `install-civ6bot-client.bat` をダウンロードして実行します。Git は不要です。インストーラーは GitHub の ZIP を PowerShell でダウンロードして展開します。正常終了でもエラーでも、最後に Enter を押すまでウィンドウは閉じません。
 
 開発者が手元で直接実行する場合:
 

@@ -1,12 +1,6 @@
 @echo off
 setlocal
 
-if /i not "%~1"=="--inner" (
-  cmd /k ""%~f0" --inner"
-  exit /b
-)
-shift
-
 set "REPO_ZIP=https://github.com/River-jp/civ6bot_node/archive/refs/heads/main.zip"
 set "INSTALL_ROOT=%LOCALAPPDATA%\Civ6BotClient"
 set "ZIP_PATH=%TEMP%\civ6bot-client.zip"
@@ -15,6 +9,7 @@ set "CLIENT_DIR=%INSTALL_ROOT%\civ6bot_node-main"
 set "EXIT_CODE=0"
 
 echo Civ6 Bot Client Installer
+echo This window will stay open until you press Enter.
 echo.
 
 where powershell >nul 2>nul
@@ -82,6 +77,11 @@ set "EXIT_CODE=%ERRORLEVEL%"
 
 :end
 echo.
-echo Press any key to close this window.
-pause >nul
+if "%EXIT_CODE%"=="0" (
+  echo Installer finished.
+) else (
+  echo Installer stopped with error code %EXIT_CODE%.
+)
+echo.
+set /p CLOSE_PROMPT=Press Enter to close this window: 
 exit /b %EXIT_CODE%
