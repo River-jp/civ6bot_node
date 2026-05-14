@@ -80,6 +80,16 @@ if not exist "%TSX_CMD%" (
   goto end
 )
 
+echo Building shared package...
+call npm run build -w @civ6bot/shared
+if errorlevel 1 (
+  echo.
+  echo Shared package build failed.
+  set "EXIT_CODE=1"
+  goto end
+)
+echo.
+
 if not exist "%LUA_LOG%" (
   echo Lua.log was not found at:
   echo %LUA_LOG%
