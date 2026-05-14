@@ -19,7 +19,7 @@ Web サイトの「使い方」ページ `/using` から `install-civ6bot-client
 このインストーラーは次を行います。
 
 - GitHub から Civ6 Bot の最新版 ZIP をダウンロード
-- `%LOCALAPPDATA%\Civ6BotClient` に展開
+- バッチを実行したフォルダ内の `Civ6BotClient` に展開
 - `start-civ6bot-client.bat` を起動
 
 インストーラー画面は、正常終了でもエラーでも最後に Enter を押すまで閉じません。エラーが出た場合は、表示内容を確認してください。

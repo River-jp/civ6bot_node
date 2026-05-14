@@ -39,7 +39,7 @@ export default function UsingPage() {
           <h2>ダウンロード</h2>
           <p>
             下のボタンからインストーラーをダウンロードし、実行してください。Git は不要です。最新版のクライアント一式を
-            <code>%LOCALAPPDATA%\Civ6BotClient</code> に展開して起動します。
+            バッチを実行したフォルダ内の <code>Civ6BotClient</code> に展開して起動します。
           </p>
           <a className="button secondary" href="/downloads/install-civ6bot-client.bat" download>
             install-civ6bot-client.bat

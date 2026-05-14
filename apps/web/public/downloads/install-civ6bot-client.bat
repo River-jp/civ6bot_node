@@ -2,7 +2,7 @@
 setlocal
 
 set "REPO_ZIP=https://github.com/River-jp/civ6bot_node/archive/refs/heads/main.zip"
-set "INSTALL_ROOT=%LOCALAPPDATA%\Civ6BotClient"
+set "INSTALL_ROOT=%~dp0Civ6BotClient"
 set "ZIP_PATH=%TEMP%\civ6bot-client.zip"
 set "EXTRACT_ROOT=%TEMP%\civ6bot-client-extract"
 set "CLIENT_DIR=%INSTALL_ROOT%\civ6bot_node-main"
@@ -10,6 +10,7 @@ set "EXIT_CODE=0"
 
 echo Civ6 Bot Client Installer
 echo This window will stay open until you press Enter.
+echo Install folder: %INSTALL_ROOT%
 echo.
 
 where powershell >nul 2>nul

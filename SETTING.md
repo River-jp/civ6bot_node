@@ -118,7 +118,7 @@ npm run register:commands -w @civ6bot/web
 インストーラーの動作:
 
 - GitHub の最新版 ZIP を PowerShell でダウンロード
-- `%LOCALAPPDATA%\Civ6BotClient` に展開
+- バッチを実行したフォルダ内の `Civ6BotClient` に展開
 - `start-civ6bot-client.bat` を起動
 
 正常終了でもエラーでも、最後に Enter を押すまでインストーラー画面は閉じません。
