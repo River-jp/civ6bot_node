@@ -14,10 +14,6 @@ const commands = [
     description: "最新のインゲーム情報を分析します"
   },
   {
-    name: "analyz",
-    description: "analyzeの互換エイリアスです"
-  },
-  {
     name: "next",
     description: "次にやるべき行動を提案します"
   },

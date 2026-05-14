@@ -12,7 +12,7 @@
     "build": "npm run build -w @civ6bot/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "client": "npm run dev -w @civ6bot/client"
+    "client": "npm run dev -w @civ6bot/client --"
   },
   "engines": {
     "node": "24.x"

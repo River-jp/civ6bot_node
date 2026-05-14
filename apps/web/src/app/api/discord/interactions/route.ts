@@ -9,6 +9,8 @@ export async function POST(request: Request) {
   if (!verified) return new Response("invalid request signature", { status: 401 });
 
   const interaction = JSON.parse(rawBody);
+  const appBaseUrl = new URL(request.url).origin;
+  interaction.app_base_url = appBaseUrl;
   if (interaction.type === InteractionType.Ping) {
     return jsonResponse({ type: InteractionResponseType.Pong });
   }

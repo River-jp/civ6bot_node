@@ -17,13 +17,14 @@ type DiscordInteraction = {
   channel_id?: string;
   member?: { user?: { id: string; username?: string; global_name?: string } };
   user?: { id: string; username?: string; global_name?: string };
+  app_base_url?: string;
 };
 
 export async function handleCommand(interaction: DiscordInteraction) {
   const name = interaction.data?.name;
   if (name === "start") return startModal();
   if (name === "link") return link(interaction);
-  if (name === "analyze" || name === "analyz") return adviceCommand(interaction, "analyze");
+  if (name === "analyze") return adviceCommand(interaction, "analyze");
   if (name === "next") return adviceCommand(interaction, "next");
   if (name === "advice") return adviceCommand(interaction, "advice");
   if (name === "status") return status(interaction);
@@ -74,7 +75,7 @@ export async function handleModal(interaction: DiscordInteraction) {
     settings
   });
   await joinMatch(matchId, user.id, user.name);
-  const url = `${env.APP_BASE_URL}/matches/${matchId}`;
+  const url = `${appBaseUrl(interaction)}/matches/${matchId}`;
   return publicMessage(
     [
       `Civ6 Botの試合を開始しました: ${matchId}`,
@@ -103,10 +104,8 @@ async function link(interaction: DiscordInteraction) {
   if (!latest) return ephemeral("参加中のアクティブな試合がありません。先に参加ボタンを押してください。");
   const token = await createLinkToken(String(latest.match_id), String(latest.player_id));
   return ephemeral([
-    "ユーザー側Node companionで次のコードを入力してください。",
-    `コード: \`${token.code}\``,
-    `期限: ${token.expiresAt}`,
-    "例: `npm run client -- claim --code " + token.code + "`"
+    "バッチファイルを起動して、次のリンクコードを入力してください。",
+    `\`${token.code}\``
   ].join("\n"));
 }
 
@@ -144,8 +143,12 @@ async function status(interaction: DiscordInteraction) {
     `試合: ${latest.match_id}`,
     `リンク: ${player?.linked_at ? "済み" : "未リンク"}`,
     `最終スナップショット: ${player?.last_snapshot_at ?? "なし"}`,
-    `閲覧ページ: ${env.APP_BASE_URL}/matches/${latest.match_id}`
+    `閲覧ページ: ${appBaseUrl(interaction)}/matches/${latest.match_id}`
   ].join("\n"));
+}
+
+function appBaseUrl(interaction: DiscordInteraction) {
+  return (interaction.app_base_url ?? env.APP_BASE_URL).replace(/\/$/, "");
 }
 
 function userFrom(interaction: DiscordInteraction) {
