@@ -16,7 +16,7 @@ type Config = {
 };
 
 const exportPrefix = "CIV6BOT_EXPORT:";
-const defaultLogPath = join(homedir(), "Documents", "My Games", "Sid Meier's Civilization VI", "Logs", "Lua.log");
+const defaultLogPath = process.env.CIV6BOT_LOG_PATH ?? join(homedir(), "Documents", "My Games", "Sid Meier's Civilization VI", "Logs", "Lua.log");
 const configPath = join(homedir(), ".civ6bot-client.json");
 
 async function main() {
@@ -48,7 +48,7 @@ async function claim(args: Record<string, string>) {
     token: json.token,
     matchId: json.matchId,
     playerId: json.playerId,
-    logPath: args.log ?? config.logPath ?? defaultLogPath
+    logPath: args.log ?? process.env.CIV6BOT_LOG_PATH ?? config.logPath ?? defaultLogPath
   });
   console.log(`Linked. Config saved to ${configPath}`);
 }
@@ -186,7 +186,7 @@ function withOverrides(config: Config, args: Record<string, string>): Config {
   return {
     ...config,
     serverUrl: args.server ?? config.serverUrl,
-    logPath: args.log ?? config.logPath
+    logPath: args.log ?? process.env.CIV6BOT_LOG_PATH ?? config.logPath
   };
 }
 

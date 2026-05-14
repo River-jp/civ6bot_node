@@ -9,6 +9,8 @@ shift
 
 set "SERVER_URL=https://civ6bot-node-web.vercel.app"
 set "LUA_LOG=%LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\Logs\Lua.log"
+set "CLIENT_DIR=%~dp0packages\client"
+set "TSX_CMD=%~dp0node_modules\.bin\tsx.cmd"
 set "EXIT_CODE=0"
 
 cd /d "%~dp0"
@@ -49,6 +51,14 @@ if not exist "package.json" (
   goto end
 )
 
+if not exist "%CLIENT_DIR%\src\index.ts" (
+  echo Client entrypoint was not found.
+  echo Expected: %CLIENT_DIR%\src\index.ts
+  echo.
+  set "EXIT_CODE=1"
+  goto end
+)
+
 if not exist "node_modules\" (
   echo Installing dependencies...
   call npm install
@@ -59,6 +69,15 @@ if not exist "node_modules\" (
     goto end
   )
   echo.
+)
+
+if not exist "%TSX_CMD%" (
+  echo tsx was not found.
+  echo Expected: %TSX_CMD%
+  echo Run npm install again.
+  echo.
+  set "EXIT_CODE=1"
+  goto end
 )
 
 if not exist "%LUA_LOG%" (
@@ -102,8 +121,13 @@ if "%LINK_CODE%"=="" (
 
 echo.
 echo Linking client...
-call npm run client -- claim --code "%LINK_CODE%" --server "%SERVER_URL%" --log "%LUA_LOG%"
-if errorlevel 1 (
+set "CIV6BOT_LOG_PATH=%LUA_LOG%"
+pushd "%CLIENT_DIR%"
+call "%TSX_CMD%" src/index.ts claim --code "%LINK_CODE%" --server "%SERVER_URL%"
+set "CLIENT_EXIT=%ERRORLEVEL%"
+popd
+set "CIV6BOT_LOG_PATH="
+if not "%CLIENT_EXIT%"=="0" (
   echo.
   echo Link failed. Check the code and try again.
   goto menu
@@ -115,17 +139,25 @@ echo Starting watch mode.
 echo Log: %LUA_LOG%
 echo Server: %SERVER_URL%
 echo.
-call npm run client -- watch --server "%SERVER_URL%" --log "%LUA_LOG%"
+set "CIV6BOT_LOG_PATH=%LUA_LOG%"
+pushd "%CLIENT_DIR%"
+call "%TSX_CMD%" src/index.ts watch --server "%SERVER_URL%"
+set "CLIENT_EXIT=%ERRORLEVEL%"
+popd
+set "CIV6BOT_LOG_PATH="
 
 echo.
 echo Watch stopped.
-set "EXIT_CODE=%ERRORLEVEL%"
+set "EXIT_CODE=%CLIENT_EXIT%"
 goto end
 
 :unlink
 echo Unlinking client...
-call npm run client -- unlink --server "%SERVER_URL%"
-if errorlevel 1 (
+pushd "%CLIENT_DIR%"
+call "%TSX_CMD%" src/index.ts unlink --server "%SERVER_URL%"
+set "CLIENT_EXIT=%ERRORLEVEL%"
+popd
+if not "%CLIENT_EXIT%"=="0" (
   echo.
   echo Unlink failed. The local config may already be missing or the token may already be invalid.
   echo.
