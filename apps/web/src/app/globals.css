@@ -24,6 +24,14 @@ a {
   color: var(--accent);
 }
 
+code {
+  font-family: Consolas, "Courier New", monospace;
+  background: #edf2f5;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
 .shell {
   width: min(1120px, calc(100vw - 32px));
   margin: 0 auto;
@@ -56,6 +64,37 @@ a {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 20px;
+}
+
+.section {
+  margin-top: 20px;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.button.secondary {
+  margin-top: 8px;
+  background: #ffffff;
+  color: var(--accent);
+}
+
+.steps {
+  margin: 12px 0 0;
+  padding-left: 22px;
+  line-height: 1.8;
 }
 
 .stat-grid {
