@@ -54,6 +54,10 @@ const commands = [
     description: "自分のリンク状態と試合状態を確認します"
   },
   {
+    name: "close",
+    description: "専用チャンネルと自分の参加情報を削除します"
+  },
+  {
     name: "help",
     description: "Civ6 Botの使い方を表示します"
   }

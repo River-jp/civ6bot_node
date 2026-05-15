@@ -13,6 +13,12 @@ export function db() {
   return client;
 }
 
+export function closeDbForTests() {
+  client?.close();
+  client = undefined;
+  initialized = false;
+}
+
 export async function ensureDb() {
   if (initialized) return;
   const database = db();
@@ -35,6 +41,7 @@ export async function ensureDb() {
       display_name TEXT NOT NULL,
       civilization TEXT,
       leader TEXT,
+      private_channel_id TEXT,
       client_token_hash TEXT,
       linked_at TEXT,
       last_snapshot_at TEXT,
@@ -73,6 +80,7 @@ export async function ensureDb() {
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     );
   `);
+  await addColumnIfMissing("match_players", "private_channel_id", "TEXT");
   initialized = true;
 }
 
@@ -110,6 +118,14 @@ export async function joinMatch(matchId: string, discordUserId: string, displayN
   return playerId;
 }
 
+export async function setPlayerPrivateChannel(matchId: string, discordUserId: string, channelId: string) {
+  await ensureDb();
+  await db().execute({
+    sql: "UPDATE match_players SET private_channel_id = ? WHERE match_id = ? AND discord_user_id = ?",
+    args: [channelId, matchId, discordUserId]
+  });
+}
+
 export async function findPlayer(matchId: string, discordUserId: string) {
   await ensureDb();
   const result = await db().execute({
@@ -117,6 +133,34 @@ export async function findPlayer(matchId: string, discordUserId: string) {
     args: [matchId, discordUserId]
   });
   return result.rows[0];
+}
+
+export async function findPlayerByPrivateChannel(channelId: string, discordUserId: string) {
+  await ensureDb();
+  const result = await db().execute({
+    sql: `SELECT m.id AS match_id, p.id AS player_id, p.private_channel_id
+          FROM match_players p
+          JOIN matches m ON m.id = p.match_id
+          WHERE p.private_channel_id = ? AND p.discord_user_id = ? AND m.status = 'active'
+          LIMIT 1`,
+    args: [channelId, discordUserId]
+  });
+  return result.rows[0];
+}
+
+export async function closePlayerSession(matchId: string, discordUserId: string) {
+  await ensureDb();
+  const player = await findPlayer(matchId, discordUserId);
+  if (!player) return { ok: false as const, reason: "not_found" };
+  const playerId = String(player.id);
+  const channelId = player.private_channel_id ? String(player.private_channel_id) : null;
+  await db().batch([
+    { sql: "DELETE FROM analyses WHERE player_id = ?", args: [playerId] },
+    { sql: "DELETE FROM snapshots WHERE player_id = ?", args: [playerId] },
+    { sql: "DELETE FROM link_tokens WHERE player_id = ?", args: [playerId] },
+    { sql: "DELETE FROM match_players WHERE id = ?", args: [playerId] }
+  ]);
+  return { ok: true as const, channelId, playerId };
 }
 
 export async function latestMatchForUser(discordUserId: string) {
@@ -305,4 +349,10 @@ async function sha256(value: string) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function addColumnIfMissing(table: string, column: string, type: string) {
+  const info = await db().execute(`PRAGMA table_info(${table})`);
+  if (info.rows.some((row) => row.name === column)) return;
+  await db().execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
 }

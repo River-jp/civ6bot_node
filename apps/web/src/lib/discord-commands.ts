@@ -1,6 +1,6 @@
 import { gameSettingsSchema, civ6SnapshotSchema, type Civ6Snapshot, type GameSettings } from "@civ6bot/shared";
-import { createLinkToken, createMatch, findPlayer, getLatestSnapshot, joinMatch, latestMatchForUser, publicMatch, saveAnalysis } from "./db";
-import { button, createDm, ephemeral, InteractionResponseType, modal, publicMessage, sendDiscordMessage, textInput } from "./discord";
+import { closePlayerSession, createLinkToken, createMatch, findPlayer, findPlayerByPrivateChannel, getLatestSnapshot, joinMatch, latestMatchForUser, publicMatch, saveAnalysis, setPlayerPrivateChannel } from "./db";
+import { button, createPrivateTextChannel, deleteDiscordChannel, ephemeral, InteractionResponseType, modal, publicMessage, sendDiscordMessage, textInput } from "./discord";
 import { env } from "./env";
 import { generateCiv6Advice } from "./gemini";
 
@@ -28,6 +28,7 @@ export async function handleCommand(interaction: DiscordInteraction) {
   if (name === "next") return adviceCommand(interaction, "next");
   if (name === "advice") return adviceCommand(interaction, "advice");
   if (name === "status") return status(interaction);
+  if (name === "close") return close(interaction);
   if (name === "help") return ephemeral(helpText());
   return ephemeral("未対応のコマンドです。`/help`を確認してください。");
 }
@@ -38,16 +39,28 @@ export async function handleComponent(interaction: DiscordInteraction) {
     const matchId = customId.slice("join:".length);
     const user = userFrom(interaction);
     if (!user) return ephemeral("ユーザー情報を取得できませんでした。");
+    if (!interaction.guild_id) return ephemeral("サーバー内で参加してください。");
     const playerId = await joinMatch(matchId, user.id, user.name);
-    const dm = await createDm(user.id);
-    if (dm) {
-      await sendDiscordMessage(
-        dm.id,
-        `Civ6 Botに参加しました。\n/link を試合チャンネルで実行して、表示されたコードをユーザー側Node companionに入力してください。\nplayerId: ${playerId}`
-      );
-      return ephemeral("参加しました。DMに次の手順を送信しました。");
+    const existingPlayer = await findPlayer(matchId, user.id);
+    let channelId = existingPlayer?.private_channel_id ? String(existingPlayer.private_channel_id) : "";
+    if (!channelId && env.DISCORD_APPLICATION_ID) {
+      const channel = await createPrivateTextChannel({
+        guildId: interaction.guild_id,
+        userId: user.id,
+        botUserId: env.DISCORD_APPLICATION_ID,
+        name: privateChannelName(user.name)
+      });
+      channelId = channel?.id ?? "";
+      if (channelId) await setPlayerPrivateChannel(matchId, user.id, channelId);
     }
-    return ephemeral("参加しました。DMを送れなかったため、Discordのプライバシー設定を確認してください。");
+    if (channelId) {
+      await sendDiscordMessage(
+        channelId,
+        `Civ6 Botに参加しました。\nこの専用チャンネルで /link を実行して、表示されたコードをユーザー側Node companionに入力してください。\n会話を終了して参加情報を消す場合は /close を実行してください。\nplayerId: ${playerId}`
+      );
+      return ephemeral(`参加しました。専用チャンネル <#${channelId}> を作成しました。`);
+    }
+    return ephemeral("参加しました。専用チャンネルを作成できませんでした。Botのチャンネル管理権限を確認してください。");
   }
   return ephemeral("未対応のボタンです。");
 }
@@ -83,7 +96,7 @@ export async function handleModal(interaction: DiscordInteraction) {
       `閲覧ページ: ${url}`,
       "参加するプレイヤーは下のボタンを押してください。"
     ].join("\n"),
-    [{ type: 1, components: [button(`join:${matchId}`, "参加してDMを開始", 3)] }]
+    [{ type: 1, components: [button(`join:${matchId}`, "参加して専用チャンネルを開始", 3)] }]
   );
 }
 
@@ -147,8 +160,25 @@ async function status(interaction: DiscordInteraction) {
   ].join("\n"));
 }
 
+async function close(interaction: DiscordInteraction) {
+  const user = userFrom(interaction);
+  if (!user || !interaction.channel_id) return ephemeral("ユーザー情報またはチャンネル情報を取得できませんでした。");
+  const session = await findPlayerByPrivateChannel(interaction.channel_id, user.id);
+  if (!session) return ephemeral("このコマンドは自分のCiv6 Bot専用チャンネルで実行してください。");
+  const result = await closePlayerSession(String(session.match_id), user.id);
+  if (!result.ok) return ephemeral("参加情報が見つかりませんでした。");
+  await sendDiscordMessage(interaction.channel_id, "参加情報を削除しました。このチャンネルを閉じます。");
+  await deleteDiscordChannel(interaction.channel_id);
+  return ephemeral("参加情報を削除しました。");
+}
+
 function appBaseUrl(interaction: DiscordInteraction) {
   return (interaction.app_base_url ?? env.APP_BASE_URL).replace(/\/$/, "");
+}
+
+function privateChannelName(displayName: string) {
+  const safeName = displayName.toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 32);
+  return `civ6-${safeName || "player"}`;
 }
 
 function userFrom(interaction: DiscordInteraction) {
@@ -182,6 +212,7 @@ function helpText() {
     "`/analyze`: 最新データを分析します。",
     "`/next`: 次にやることを提案します。",
     "`/advice question:<質問>`: 任意質問に答えます。",
-    "`/status`: 自分のリンク状態を確認します。"
+    "`/status`: 自分のリンク状態を確認します。",
+    "`/close`: 専用チャンネルと自分の参加情報を削除します。"
   ].join("\n");
 }

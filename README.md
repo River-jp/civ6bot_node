@@ -35,7 +35,7 @@ slash command 登録:
 npm run register:commands -w @civ6bot/web
 ```
 
-登録されるコマンドは `/start` `/link` `/analyze` `/next` `/advice` `/status` `/help` です。
+登録されるコマンドは `/start` `/link` `/analyze` `/next` `/advice` `/status` `/close` `/help` です。
 
 ## Vercel デプロイ
 
@@ -75,10 +75,11 @@ DATABASE_AUTH_TOKEN=
 
 1. Discord の試合チャンネルで `/start` を実行し、試合情報を入力します。
 2. Bot のメッセージに表示される参加ボタンを各プレイヤーが押します。
-3. 各プレイヤーが `/link` を実行し、表示されたリンクコードを PC 側バッチに入力します。
+3. 各プレイヤーが専用チャンネルで `/link` を実行し、表示されたリンクコードを PC 側バッチに入力します。
 4. PC 側クライアントが `Lua.log` を監視し、Bot サーバーへスナップショットを送信します。
 5. `/matches/<matchId>` で試合状況ページを確認します。
 6. `/analyze` `/next` `/advice question:<質問>` で助言を受け取ります。
+7. 会話を終了するときは専用チャンネルで `/close` を実行し、自分の参加情報と専用チャンネルを削除します。
 
 利用者向けの詳しい手順は [USING.md](./USING.md) を参照してください。
 

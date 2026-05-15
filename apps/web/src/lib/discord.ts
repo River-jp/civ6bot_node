@@ -1,6 +1,8 @@
 import nacl from "tweetnacl";
 import { env } from "./env";
 
+const privateChannelAllow = String(1024 + 2048 + 65536 + 2147483648);
+
 export const InteractionType = {
   Ping: 1,
   ApplicationCommand: 2,
@@ -74,18 +76,42 @@ export function button(customId: string, label: string, style = 1) {
   return { type: 2, custom_id: customId, label, style };
 }
 
-export async function createDm(userId: string) {
+export async function createPrivateTextChannel(input: {
+  guildId: string;
+  userId: string;
+  botUserId: string;
+  name: string;
+}) {
   if (!env.DISCORD_BOT_TOKEN) return null;
-  const response = await fetch("https://discord.com/api/v10/users/@me/channels", {
+  const response = await fetch(`https://discord.com/api/v10/guilds/${input.guildId}/channels`, {
     method: "POST",
     headers: {
       authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
       "content-type": "application/json"
     },
-    body: JSON.stringify({ recipient_id: userId })
+    body: JSON.stringify({
+      name: input.name,
+      type: 0,
+      permission_overwrites: [
+        { id: input.guildId, type: 0, deny: "1024" },
+        { id: input.userId, type: 1, allow: privateChannelAllow },
+        { id: input.botUserId, type: 1, allow: privateChannelAllow }
+      ]
+    })
   });
   if (!response.ok) return null;
   return await response.json() as { id: string };
+}
+
+export async function deleteDiscordChannel(channelId: string) {
+  if (!env.DISCORD_BOT_TOKEN) return false;
+  const response = await fetch(`https://discord.com/api/v10/channels/${channelId}`, {
+    method: "DELETE",
+    headers: {
+      authorization: `Bot ${env.DISCORD_BOT_TOKEN}`
+    }
+  });
+  return response.ok;
 }
 
 export async function sendDiscordMessage(channelId: string, content: string) {

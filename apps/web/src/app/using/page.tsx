@@ -5,6 +5,7 @@ const commands = [
   ["/analyze", "最新データを分析します。"],
   ["/next", "次にやることを提案します。"],
   ["/advice", "任意の質問に対して助言を返します。"],
+  ["/close", "専用チャンネルと自分の参加情報を削除します。"],
   ["/help", "コマンド一覧を表示します。"]
 ];
 
@@ -52,9 +53,10 @@ export default function UsingPage() {
         <ol className="steps">
           <li>試合チャンネルで <code>/start</code> を実行します。</li>
           <li>試合設定を入力して送信します。</li>
-          <li>Bot が投稿した「参加してDMを開始」ボタンを各プレイヤーが押します。</li>
-          <li>各プレイヤーが <code>/link</code> を実行します。</li>
+          <li>Bot が投稿した「参加して専用チャンネルを開始」ボタンを各プレイヤーが押します。</li>
+          <li>各プレイヤーが作成された専用チャンネルで <code>/link</code> を実行します。</li>
           <li>表示されたリンクコードを PC クライアントのバッチファイルに入力します。</li>
+          <li>会話を終了するときは専用チャンネルで <code>/close</code> を実行します。</li>
         </ol>
       </section>
 

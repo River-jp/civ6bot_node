@@ -68,6 +68,7 @@ npm run register:commands -w @civ6bot/web
 - `/next`
 - `/advice`
 - `/status`
+- `/close`
 - `/help`
 
 古い `/analyz` は現在使用しません。残っている場合は、このコマンド登録を再実行してください。
@@ -97,11 +98,12 @@ npm run register:commands -w @civ6bot/web
 
 1. 試合チャンネルで `/start` を実行します。
 2. 参加者は Bot メッセージの参加ボタンを押します。
-3. 各参加者が `/link` でリンクコードを取得します。
+3. 各参加者が作成された専用チャンネルで `/link` を実行し、リンクコードを取得します。
 4. 参加者側クライアントがコードを claim します。
 5. 参加者側クライアントが `Lua.log` を監視し、スナップショットを送信します。
 6. `/matches/<matchId>` で試合状況ページを閲覧します。
 7. `/analyze` `/next` `/advice` で助言を返します。
+8. 終了時は専用チャンネルで `/close` を実行し、参加情報と専用チャンネルを削除します。
 
 ## 2. Bot 利用者側
 
@@ -153,6 +155,7 @@ Git は不要です。Node.js と npm は必要です。
 3. スナップショット未反映: watch が停止している、または `Lua.log` パスが違います。
 4. AI 応答が簡易文になる: `GEMINI_API_KEY` が未設定です。
 5. Discord コマンドが出ない: `register:commands` 未実行、または Bot の権限不足です。
-6. `/analyz` が残っている: 古いコマンドです。`register:commands` を再実行してください。
-7. 試合状況ページが 404: `matchId` が誤っているか、試合が未作成です。
-8. Vercel の install が失敗する: Root Directory が `apps/web` になっていないか確認してください。repo root にします。
+6. 専用チャンネルが作成されない: Bot にチャンネル管理、チャンネル閲覧、メッセージ送信の権限があるか確認してください。
+7. `/analyz` が残っている: 古いコマンドです。`register:commands` を再実行してください。
+8. 試合状況ページが 404: `matchId` が誤っているか、試合が未作成です。
+9. Vercel の install が失敗する: Root Directory が `apps/web` になっていないか確認してください。repo root にします。
