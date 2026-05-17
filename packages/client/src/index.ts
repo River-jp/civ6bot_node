@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 type Config = {
   serverUrl: string;
@@ -113,19 +114,24 @@ function clearLink(config: Config) {
   });
 }
 
-async function readNewExports(logPath: string, offset: number) {
+export async function readNewExports(logPath: string, offset: number) {
   if (!existsSync(logPath)) throw new Error(`Lua.log not found: ${logPath}`);
   const currentSize = statSync(logPath).size;
   const safeOffset = offset > currentSize ? 0 : offset;
-  const content = readFileSync(logPath, "utf8").slice(safeOffset);
-  const payloads = content
+  const content = readFileSync(logPath).subarray(safeOffset).toString("utf8");
+  const lastNewline = Math.max(content.lastIndexOf("\n"), content.lastIndexOf("\r"));
+  const completeContent = lastNewline >= 0 ? content.slice(0, lastNewline + 1) : "";
+  const trailingContent = lastNewline >= 0 ? content.slice(lastNewline + 1) : content;
+  const payloads = completeContent
     .split(/\r?\n/)
-    .map((line) => {
-      const index = line.indexOf(exportPrefix);
-      return index >= 0 ? line.slice(index + exportPrefix.length).trim() : "";
-    })
+    .map(exportPayloadFromLine)
     .filter(Boolean);
-  return { offset: currentSize, payloads };
+  const trailingPayload = exportPayloadFromLine(trailingContent);
+  if (trailingPayload && isCompleteJson(trailingPayload)) {
+    payloads.push(trailingPayload);
+    return { offset: currentSize, payloads };
+  }
+  return { offset: safeOffset + Buffer.byteLength(completeContent), payloads };
 }
 
 async function sendPayload(config: Config, payload: string) {
@@ -207,6 +213,20 @@ function hash(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+function exportPayloadFromLine(line: string) {
+  const index = line.indexOf(exportPrefix);
+  return index >= 0 ? line.slice(index + exportPrefix.length).trim() : "";
+}
+
+function isCompleteJson(value: string) {
+  try {
+    JSON.parse(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function help() {
   console.log([
     "Civ6 Bot client",
@@ -219,7 +239,9 @@ function help() {
   ].join("\n"));
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.message : error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  });
+}

@@ -71,10 +71,19 @@ if errorlevel 1 (
   goto end
 )
 
+if not exist "%CLIENT_DIR%\start-civ6bot-client.bat" (
+  echo Client start file was not found after install.
+  echo Expected: %CLIENT_DIR%\start-civ6bot-client.bat
+  set "EXIT_CODE=1"
+  goto end
+)
+
 echo.
 echo Starting Civ6 Bot client...
-call "%CLIENT_DIR%\start-civ6bot-client.bat" --inner
+pushd "%CLIENT_DIR%"
+call start-civ6bot-client.bat --inner
 set "EXIT_CODE=%ERRORLEVEL%"
+popd
 
 :end
 echo.
