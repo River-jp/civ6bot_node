@@ -44,6 +44,15 @@ export function ephemeral(content: string, components?: unknown[]) {
   };
 }
 
+export function deferredEphemeral() {
+  return {
+    type: InteractionResponseType.DeferredChannelMessageWithSource,
+    data: {
+      flags: 64
+    }
+  };
+}
+
 export function publicMessage(content: string, components?: unknown[]) {
   return {
     type: InteractionResponseType.ChannelMessageWithSource,
@@ -120,6 +129,17 @@ export async function sendDiscordMessage(channelId: string, content: string) {
     method: "POST",
     headers: {
       authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({ content })
+  });
+  return response.ok;
+}
+
+export async function editOriginalInteractionResponse(applicationId: string, token: string, content: string) {
+  const response = await fetch(`https://discord.com/api/v10/webhooks/${applicationId}/${token}/messages/@original`, {
+    method: "PATCH",
+    headers: {
       "content-type": "application/json"
     },
     body: JSON.stringify({ content })

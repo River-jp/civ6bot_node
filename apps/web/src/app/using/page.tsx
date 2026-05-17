@@ -67,11 +67,13 @@ export default function UsingPage() {
           <li>Node.js と npm の確認が表示されます。</li>
           <li>初回は <code>1. Link and start watch</code> を選びます。</li>
           <li>Discord の <code>/link</code> で表示されたコードを入力します。</li>
+          <li>監視するログの場所を変える場合は <code>4. Change Lua.log path</code> を選びます。</li>
           <li>リンクに成功すると watch モードが起動します。</li>
           <li>Civ6 のログが更新されると、試合状況ページに反映されます。</li>
         </ol>
         <p className="empty">
-          監視するログは <code>%LOCALAPPDATA%\Firaxis Games\Sid Meier&apos;s Civilization VI\Logs\Lua.log</code> です。
+          監視するログは通常 <code>%LOCALAPPDATA%\Firaxis Games\Sid Meier&apos;s Civilization VI\Logs\Lua.log</code> です。
+          変更したパスは <code>%USERPROFILE%\.civ6bot-log-path.txt</code> に保存されます。
         </p>
       </section>
 
@@ -100,7 +102,7 @@ export default function UsingPage() {
           <h2>うまく動かない時</h2>
           <ul className="steps">
             <li>リンクコードは期限切れや使用済みになるため、失敗したら <code>/link</code> を再実行してください。</li>
-            <li><code>Lua.log</code> が見つからない場合は Civilization VI を一度起動してください。</li>
+            <li><code>Lua.log</code> が見つからない場合は Civilization VI を一度起動するか、<code>4. Change Lua.log path</code> で監視先を変更してください。</li>
             <li>試合状況が更新されない場合は、watch モードが起動したままか確認してください。</li>
           </ul>
         </div>

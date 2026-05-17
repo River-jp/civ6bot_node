@@ -48,7 +48,8 @@ Git は不要です。インストーラーは `git clone` ではなく、Window
 4. 初回は `1. Link and start watch` を選び、リンクコードを入力します。
 5. リンク済みの場合は `2. Start watch` で監視だけ開始できます。
 6. リンク解除は `3. Unlink` を選びます。
-7. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
+7. 監視するログの場所を変える場合は `4. Change Lua.log path` を選びます。
+8. watch モード中は Civilization VI の `Lua.log` を監視し、ゲーム情報をサーバーに送信します。
 
 メニュー:
 
@@ -56,7 +57,8 @@ Git は不要です。インストーラーは `git clone` ではなく、Window
 1. Link and start watch
 2. Start watch
 3. Unlink
-4. Exit
+4. Change Lua.log path
+5. Exit
 ```
 
 監視対象のログは通常ここです。
@@ -64,6 +66,8 @@ Git は不要です。インストーラーは `git clone` ではなく、Window
 ```text
 %LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\Logs\Lua.log
 ```
+
+`4. Change Lua.log path` で保存したパスは `%USERPROFILE%\.civ6bot-log-path.txt` に保存され、次回起動時も使われます。
 
 ## Web ページで見るもの
 
@@ -103,6 +107,7 @@ Node.js をインストール後、PC を再起動するか、新しいコマン
 ### Lua.log が見つからない
 
 Civilization VI を一度起動してください。ログ出力が無効な場合は、Civ6 の設定や Mod 側のログ出力設定を確認してください。
+標準の場所と違う `Lua.log` を使う場合は、バッチメニューの `4. Change Lua.log path` でフルパスを指定してください。
 
 ### リンクに失敗する
 

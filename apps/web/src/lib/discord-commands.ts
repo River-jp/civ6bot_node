@@ -7,6 +7,8 @@ import { generateCiv6Advice } from "./gemini";
 type DiscordOption = { name: string; value?: string | number | boolean };
 type DiscordInteraction = {
   type: number;
+  application_id?: string;
+  token?: string;
   data?: {
     name?: string;
     custom_id?: string;
@@ -144,6 +146,11 @@ async function adviceCommand(interaction: DiscordInteraction, kind: "analyze" | 
     result
   });
   return ephemeral(formatAdvice(result));
+}
+
+export async function runAdviceCommand(interaction: DiscordInteraction, kind: "analyze" | "next" | "advice") {
+  const response = await adviceCommand(interaction, kind);
+  return String(response.data.content ?? "結果を取得できませんでした。");
 }
 
 async function status(interaction: DiscordInteraction) {

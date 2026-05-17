@@ -101,6 +101,8 @@ npm run client -- unlink --server https://your-app.vercel.app
 %LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\Logs\Lua.log
 ```
 
+標準パスと異なる `Lua.log` を監視する場合は、`start-civ6bot-client.bat` の `4. Change Lua.log path` でフルパスを保存できます。保存先は `%USERPROFILE%\.civ6bot-log-path.txt` です。
+
 リンク解除は `unlink` API によりサーバー側トークンを無効化し、PC 側の保存済みリンク情報も削除します。
 
 ## 注意

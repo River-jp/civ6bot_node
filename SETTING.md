@@ -135,12 +135,15 @@ Git は不要です。Node.js と npm は必要です。
 1. Link and start watch
 2. Start watch
 3. Unlink
-4. Exit
+4. Change Lua.log path
+5. Exit
 ```
 
 初回は `/link` で取得したコードを `1. Link and start watch` に入力します。リンク済みなら `2. Start watch` で監視だけ開始できます。
 
 `3. Unlink` はサーバー側のトークンを無効化し、PC 側の保存済みリンク情報も削除します。
+
+`4. Change Lua.log path` は監視する `Lua.log` のフルパスを `%USERPROFILE%\.civ6bot-log-path.txt` に保存します。保存済みのパスがある場合、次回起動時は標準パスより優先されます。
 
 標準の監視対象:
 
@@ -152,7 +155,7 @@ Git は不要です。Node.js と npm は必要です。
 
 1. `/link` が失敗する: 先に参加ボタンを押していない、またはアクティブな試合がない可能性があります。
 2. リンクコードが使えない: 期限切れ、入力ミス、または使用済みです。`/link` を再実行してください。
-3. スナップショット未反映: watch が停止している、または `Lua.log` パスが違います。
+3. スナップショット未反映: watch が停止している、または `Lua.log` パスが違います。必要なら `4. Change Lua.log path` で監視対象を変更してください。
 4. AI 応答が簡易文になる: `GEMINI_API_KEY` が未設定です。
 5. Discord コマンドが出ない: `register:commands` 未実行、または Bot の権限不足です。
 6. 専用チャンネルが作成されない: Bot にチャンネル管理、チャンネル閲覧、メッセージ送信の権限があるか確認してください。

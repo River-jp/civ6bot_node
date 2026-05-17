@@ -1,5 +1,5 @@
 @echo off
-setlocal
+setlocal EnableExtensions EnableDelayedExpansion
 
 if /i not "%~1"=="--inner" (
   cmd /k ""%~f0" --inner"
@@ -9,9 +9,16 @@ shift
 
 set "SERVER_URL=https://civ6bot-node-web.vercel.app"
 set "LUA_LOG=%LOCALAPPDATA%\Firaxis Games\Sid Meier's Civilization VI\Logs\Lua.log"
+set "LOG_CONFIG=%USERPROFILE%\.civ6bot-log-path.txt"
 set "CLIENT_DIR=%~dp0packages\client"
 set "TSX_CMD=%~dp0node_modules\.bin\tsx.cmd"
 set "EXIT_CODE=0"
+
+if exist "%LOG_CONFIG%" (
+  set "SAVED_LUA_LOG="
+  set /p SAVED_LUA_LOG=<"%LOG_CONFIG%"
+  if not "%SAVED_LUA_LOG%"=="" set "LUA_LOG=%SAVED_LUA_LOG%"
+)
 
 cd /d "%~dp0"
 
@@ -104,7 +111,8 @@ echo Select an action:
 echo   1. Link and start watch
 echo   2. Start watch
 echo   3. Unlink
-echo   4. Exit
+echo   4. Change Lua.log path
+echo   5. Exit
 echo.
 set "ACTION="
 set /p ACTION=Enter number: 
@@ -113,10 +121,43 @@ echo.
 if "%ACTION%"=="1" goto link
 if "%ACTION%"=="2" goto watch
 if "%ACTION%"=="3" goto unlink
-if "%ACTION%"=="4" goto end
+if "%ACTION%"=="4" goto change_log_path
+if "%ACTION%"=="5" goto end
 
 echo Invalid selection.
 echo.
+goto menu
+
+:change_log_path
+echo Current Lua.log path:
+echo %LUA_LOG%
+echo.
+echo Enter the full path to Lua.log.
+echo You can drag and drop Lua.log into this window, then press Enter.
+echo Leave blank to cancel.
+echo.
+set "NEW_LUA_LOG="
+set /p NEW_LUA_LOG=Lua.log path: 
+set "NEW_LUA_LOG=!NEW_LUA_LOG:"=!"
+
+if "!NEW_LUA_LOG!"=="" (
+  echo.
+  echo Log path was not changed.
+  echo.
+  goto menu
+)
+
+set "LUA_LOG=!NEW_LUA_LOG!"
+>"%LOG_CONFIG%" echo !LUA_LOG!
+echo.
+echo Log path saved to:
+echo %LOG_CONFIG%
+echo.
+if not exist "!LUA_LOG!" (
+  echo Lua.log was not found at the saved path.
+  echo The client can still start, but uploads can only happen after Lua.log exists.
+  echo.
+)
 goto menu
 
 :link
